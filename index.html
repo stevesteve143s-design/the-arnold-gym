@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<title>THE ARNOLD GYM</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+    font-family:Arial,sans-serif;
+    background:#080808;
+    color:#fff;
+    min-height:100vh;
+}
+.header{
+    padding:22px 18px 18px;
+    background:#101010;
+    border-bottom:1px solid #292929;
+}
+.logo{
+    font-size:25px;
+    font-weight:900;
+    letter-spacing:1px;
+}
+.gold{color:#d4af37}
+.subtitle{
+    color:#888;
+    font-size:11px;
+    margin-top:5px;
+    letter-spacing:2px;
+}
+.container{
+    padding:18px;
+    padding-bottom:90px;
+    max-width:900px;
+    margin:auto;
+}
+h1{font-size:25px;margin-bottom:18px}
+h2{font-size:18px;margin-bottom:15px}
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+}
+.card{
+    background:#151515;
+    border:1px solid #292929;
+    border-radius:16px;
+    padding:17px;
+    margin-bottom:14px;
+}
+.stat-title{
+    color:#888;
+    font-size:12px;
+}
+.stat{
+    font-size:27px;
+    font-weight:800;
+    margin-top:8px;
+}
+.action-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+button{
+    border:0;
+    border-radius:11px;
+    padding:14px;
+    font-weight:bold;
+    cursor:pointer;
+}
+.gold-btn{
+    background:#d4af37;
+    color:#000;
+}
+.dark-btn{
+    background:#292929;
+    color:#fff;
+}
+.bottom{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    background:#111;
+    border-top:1px solid #333;
+    display:flex;
+    justify-content:space-around;
+    padding:10px 5px;
+    z-index:10;
+}
+.bottom button{
+    background:none;
+    color:#aaa;
+    padding:7px;
+    font-size:11px;
+}
+.bottom button.active{
+    color:#d4af37;
+}
+.page{display:none}
+.page.active{display:block}
+input,select{
+    width:100%;
+    padding:13px;
+    margin:7px 0 13px;
+    border-radius:9px;
+    border:1px solid #444;
+    background:#0d0d0d;
+    color:#fff;
+    font-size:15px;
+}
+label{
+    font-size:12px;
+    color:#aaa;
+}
+.member{
+    background:#191919;
+    border:1px solid #303030;
+    padding:15px;
+    border-radius:13px;
+    margin-bottom:10px;
+}
+.member-name{
+    font-size:17px;
+    font-weight:bold;
+}
+.member-info{
+    color:#999;
+    font-size:12px;
+    margin-top:6px;
+}
+.badge{
+    display:inline-block;
+    margin-top:8px;
+    padding:5px 9px;
+    border-radius:20px;
+    background:#173c24;
+    color:#6ee394;
+    font-size:11px;
+}
+.empty{
+    color:#777;
+    text-align:center;
+    padding:30px 10px;
+}
+@media(max-width:500px){
+    .grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+    <div class="logo">
+        <span class="gold">THE ARNOLD</span> GYM
+    </div>
+    <div class="subtitle">GYM MANAGEMENT SYSTEM</div>
+</header>
+
+<main class="container">
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="page active">
+<h1>Dashboard</h1>
+
+<div class="grid">
+<div class="card">
+<div class="stat-title">TOTAL MEMBERS</div>
+<div class="stat" id="totalMembers">0</div>
+</div>
+
+<div class="card">
+<div class="stat-title">ACTIVE MEMBERS</div>
+<div class="stat" id="activeMembers">0</div>
+</div>
+
+<div class="card">
+<div class="stat-title">TOTAL FEES</div>
+<div class="stat gold" id="totalFees">₹0</div>
+</div>
+
+<div class="card">
+<div class="stat-title">EXPENSES</div>
+<div class="stat" id="totalExpenses">₹0</div>
+</div>
+</div>
+
+<div class="card">
+<h2>Quick Actions</h2>
+
+<div class="action-grid">
+<button class="gold-btn" onclick="showPage('add')">
++ Add Member
+</button>
+
+<button class="dark-btn" onclick="showPage('fees')">
+💳 Collect Fee
+</button>
+
+<button class="dark-btn" onclick="showPage('expenses')">
+💰 Add Expense
+</button>
+
+<button class="dark-btn" onclick="showPage('inventory')">
+📦 Inventory
+</button>
+</div>
+</div>
+
+<div class="card">
+<h2>Recent Members</h2>
+<div id="recentMembers"></div>
+</div>
+
+</section>
+
+
+<!-- MEMBERS -->
+<section id="members" class="page">
+<h1>Members</h1>
+
+<button class="gold-btn" onclick="showPage('add')">
++ Add New Member
+</button>
+
+<div style="height:15px"></div>
+
+<div class="card">
+<input
+type="search"
+id="memberSearch"
+placeholder="🔍 Search member..."
+oninput="renderMembers()">
+</div>
+
+<div id="memberList"></div>
+</section>
+
+
+<!-- ADD MEMBER -->
+<section id="add" class="page">
+<h1>Add Member</h1>
+
+<div class="card">
+
+<label>Member Name</label>
+<input id="name" placeholder="Enter full name">
+
+<label>Phone Number</label>
+<input id="phone" type="tel" placeholder="10 digit mobile number">
+
+<label>Membership Plan</label>
+<select id="plan">
+<option>Monthly</option>
+<option>Quarterly</option>
+<option>Half Yearly</option>
+<option>Yearly</option>
+<option>Personal Training</option>
+</select>
+
+<label>Membership Fee</label>
+<input id="fee" type="number" placeholder="₹">
+
+<label>Joining Date</label>
+<input id="joinDate" type="date">
+
+<label>Expiry Date</label>
+<input id="expiryDate" type="date">
+
+<button class="gold-btn" style="width:100%" onclick="addMember()">
+SAVE MEMBER
+</button>
+
+</div>
+</section>
+
+
+<!-- FEES -->
+<section id="fees" class="page">
+<h1>Fees & Payments</h1>
+
+<div class="card">
+<div class="stat-title">TOTAL COLLECTION</div>
+<div class="stat gold" id="feeTotal">₹0</div>
+</div>
+
+<div class="card">
+<label>Member</label>
+<select id="paymentMember"></select>
+
+<label>Amount</label>
+<input id="paymentAmount" type="number" placeholder="₹">
+
+<label>Date</label>
+<input id="paymentDate" type="date">
+
+<button class="gold-btn" style="width:100%" onclick="addPayment()">
+SAVE PAYMENT
+</button>
+</div>
+
+<div class="card">
+<h2>Payment History</h2>
+<div id="paymentList"></div>
+</div>
+</section>
+
+
+<!-- EXPENSES -->
+<section id="expenses" class="page">
+<h1>Expenses</h1>
+
+<div class="card">
+<div class="stat-title">TOTAL EXPENSES</div>
+<div class="stat" id="expenseTotal">₹0</div>
+</div>
+
+<div class="card">
+<label>Expense Name</label>
+<input id="expenseName" placeholder="Electricity / Rent / Equipment">
+
+<label>Category</label>
+<select id="expenseCategory">
+<option>Electricity</option>
+<option>Rent</option>
+<option>Equipment</option>
+<option>Salary</option>
+<option>Cleaning</option>
+<option>Maintenance</option>
+<option>Other</option>
+</select>
+
+<label>Amount</label>
+<input id="expenseAmount" type="number" placeholder="₹">
+
+<button class="gold-btn" style="width:100%" onclick="addExpense()">
+SAVE EXPENSE
+</button>
+</div>
+
+<div class="card">
+<h2>Expense History</h2>
+<div id="expenseList"></div>
+</div>
+</section>
+
+
+<!-- INVENTORY -->
+<section id="inventory" class="page">
+<h1>Inventory</h1>
+
+<div class="card">
+<label>Item Name</label>
+<input id="stockName" placeholder="Protein / Gloves / Water">
+
+<label>Quantity</label>
+<input id="stockQty" type="number" placeholder="Quantity">
+
+<label>Price</label>
+<input id="stockPrice" type="number" placeholder="₹">
+
+<button class="gold-btn" style="width:100%" onclick="addStock()">
+ADD STOCK
+</button>
+</div>
+
+<div class="card">
+<h2>Current Stock</h2>
+<div id="stockList"></div>
+</div>
+</section>
+
+</main>
+
+
+<!-- BOTTOM NAV -->
+<nav class="bottom">
+
+<button class="active" onclick="showPage('dashboard',this)">
+🏠<br>Home
+</button>
+
+<button onclick="showPage('members',this)">
+👤<br>Members
+</button>
+
+<button onclick="showPage('fees',this)">
+💳<br>Fees
+</button>
+
+<button onclick="showPage('expenses',this)">
+💰<br>Expenses
+</button>
+
+<button onclick="showPage('inventory',this)">
+📦<br>Stock
+</button>
+
+</nav>
+
+
+<script>
+
+let members =
+JSON.parse(localStorage.getItem("arnold_members") || "[]");
+
+let payments =
+JSON.parse(localStorage.getItem("arnold_payments") || "[]");
+
+let expenses =
+JSON.parse(localStorage.getItem("arnold_expenses") || "[]");
+
+let inventory =
+JSON.parse(localStorage.getItem("arnold_inventory") || "[]");
+
+
+function save(){
+localStorage.setItem("arnold_members",JSON.stringify(members));
+localStorage.setItem("arnold_payments",JSON.stringify(payments));
+localStorage.setItem("arnold_expenses",JSON.stringify(expenses));
+localStorage.setItem("arnold_inventory",JSON.stringify(inventory));
+}
+
+
+function showPage(id,button){
+
+document.querySelectorAll(".page")
+.forEach(p=>p.classList.remove("active"));
+
+document.getElementById(id)
+.classList.add("active");
+
+document.querySelectorAll(".bottom button")
+.forEach(b=>b.classList.remove("active"));
+
+if(button) button.classList.add("active");
+
+updateDashboard();
+renderMembers();
+renderPayments();
+renderExpenses();
+renderInventory();
+updatePaymentMembers();
+
+window.scrollTo(0,0);
+}
+
+
+function addMember(){
+
+let name=document.getElementById("name").value.trim();
+
+if(!name){
+alert("Please enter member name");
+return;
+}
+
+let member={
+id:Date.now(),
+name:name,
+phone:document.getElementById("phone").value,
+plan:document.getElementById("plan").value,
+fee:Number(document.getElementById("fee").value)||0,
+joinDate:document.getElementById("joinDate").value,
+expiryDate:document.getElementById("expiryDate").value
+};
+
+members.push(member);
+save();
+
+alert("Member added successfully!");
+
+document.getElementById("name").value="";
+document.getElementById("phone").value="";
+document.getElementById("fee").value="";
+document.getElementById("joinDate").value="";
+document.getElementById("expiryDate").value="";
+
+showPage("members");
+}
+
+
+function renderMembers(){
+
+let list=document.getElementById("memberList");
+
+if(!list)return;
+
+let search=
+(document.getElementById("memberSearch")?.value || "")
+.toLowerCase();
+
+let filtered=members.filter(m=>
+m.name.toLowerCase().includes(search) ||
+(m.phone||"").includes(search)
+);
+
+if(filtered.length===0){
+list.innerHTML='<div class="empty">No members found</div>';
+return;
+}
+
+list.innerHTML=filtered.map(m=>`
+<div class="member">
+
+<div class="member-name">${m.name}</div>
+
+<div class="member-info">
+📞 ${m.phone||"-"}<br>
+🏋️ ${m.plan}<br>
+💰 ₹${m.fee}<br>
+📅 Expiry: ${m.expiryDate||"-"}
+</div>
+
+<span class="badge">ACTIVE</span>
+
+<br>
+
+<button class="dark-btn"
+onclick="deleteMember(${m.id})">
+Delete
+</button>
+
+</div>
+`).join("");
+}
+
+
+function deleteMember(id){
+
+if(confirm("Delete this member?")){
+members=members.filter(m=>m.id!==id);
+save();
+renderMembers();
+updateDashboard();
+}
+}
+
+
+function addPayment(){
+
+let memberId=Number(
+document.getElementById("paymentMember").value
+);
+
+let amount=Number(
+document.getElementById("paymentAmount").value
+);
+
+if(!memberId || !amount){
+alert("Select member and enter amount");
+return;
+}
+
+payments.push({
+id:Date.now(),
+memberId:memberId,
+amount:amount,
+date:document.getElementById("paymentDate").value ||
+new Date().toISOString().slice(0,10)
+});
+
+save();
+
+document.getElementById("paymentAmount").value="";
+
+alert("Payment saved!");
+renderPayments();
+updateDashboard();
+}
+
+
+function updatePaymentMembers(){
+
+let select=document.getElementById("paymentMember");
+
+if(!select)return;
+
+select.innerHTML=members.map(m=>
+`<option value="${m.id}">${m.name}</option>`
+).join("");
+
+}
+
+
+function renderPayments(){
+
+let list=document.getElementById("paymentList");
+
+if(!list)return;
+
+if(payments.length===0){
+list.innerHTML='<div class="empty">No payments yet</div>';
+}else{
+
+list.innerHTML=payments.slice().reverse().map(p=>{
+
+let m=members.find(x=>x.id===p.memberId);
+
+return `
+<div class="member">
+<b>${m?m.name:"Unknown"}</b>
+<div class="member-info">
+₹${p.amount} • ${p.date}
+</div>
+</div>
+`;
+
+}).join("");
+}
+
+let total=payments.reduce((s,p)=>s+p.amount,0);
+
+let el=document.getElementById("feeTotal");
+if(el)el.innerText="₹"+total;
+}
+
+
+function addExpense(){
+
+let name=document.getElementById("expenseName").value.trim();
+
+let amount=Number(
+document.getElementById("expenseAmount").value
+);
+
+if(!name || !amount){
+alert("Enter expense and amount");
+return;
+}
+
+expenses.push({
+id:Date.now(),
+name:name,
+category:document.getElementById("expenseCategory").value,
+amount:amount,
+date:new Date().toISOString().slice(0,10)
+});
+
+save();
+
+document.getElementById("expenseName").value="";
+document.getElementById("expenseAmount").value="";
+
+alert("Expense saved!");
+
+renderExpenses();
+updateDashboard();
+}
+
+
+function renderExpenses(){
+
+let list=document.getElementById("expenseList");
+
+if(!list)return;
+
+if(expenses.length===0){
+list.innerHTML='<div class="empty">No expenses yet</div>';
+}else{
+
+list.innerHTML=expenses.slice().reverse().map(e=>`
+<div class="member">
+<b>${e.name}</b>
+<div class="member-info">
+${e.category} • ₹${e.amount} • ${e.date}
+</div>
+</div>
+`).join("");
+}
+
+let total=expenses.reduce((s,e)=>s+e.amount,0);
+
+let el=document.getElementById("expenseTotal");
+if(el)el.innerText="₹"+total;
+}
+
+
+function addStock(){
+
+let name=document.getElementById("stockName").value.trim();
+
+let qty=Number(document.getElementById("stockQty").value);
+
+let price=Number(document.getElementById("stockPrice").value)||0;
+
+if(!name || !qty){
+alert("Enter item and quantity");
+return;
+}
+
+inventory.push({
+id:Date.now(),
+name:name,
+qty:qty,
+price:price
+});
+
+save();
+
+document.getElementById("stockName").value="";
+document.getElementById("stockQty").value="";
+document.getElementById("stockPrice").value="";
+
+alert("Stock added!");
+
+renderInventory();
+}
+
+
+function renderInventory(){
+
+let list=document.getElementById("stockList");
+
+if(!list)return;
+
+if(inventory.length===0){
+list.innerHTML='<div class="empty">No stock added</div>';
+return;
+}
+
+list.innerHTML=inventory.slice().reverse().map(i=>`
+<div class="member">
+<b>${i.name}</b>
+<div class="member-info">
+Quantity: ${i.qty}<br>
+Price: ₹${i.price}
+</div>
+</div>
+`).join("");
+}
+
+
+function updateDashboard(){
+
+let total=document.getElementById("totalMembers");
+let active=document.getElementById("activeMembers");
+let fees=document.getElementById("totalFees");
+let exp=document.getElementById("totalExpenses");
+
+if(total)total.innerText=members.length;
+if(active)active.innerText=members.length;
+
+let ft=payments.reduce((s,p)=>s+p.amount,0);
+let et=expenses.reduce((s,e)=>s+e.amount,0);
+
+if(fees)fees.innerText="₹"+ft;
+if(exp)exp.innerText="₹"+et;
+
+let recent=document.getElementById("recentMembers");
+
+if(recent){
+
+if(members.length===0){
+recent.innerHTML='<div class="empty">No members added yet</div>';
+}else{
+
+recent.innerHTML=members.slice(-5).reverse().map(m=>`
+<div class="member">
+<div class="member-name">${m.name}</div>
+<div class="member-info">
+${m.plan} • Expiry: ${m.expiryDate||"-"}
+</div>
+</div>
+`).join("");
+
+}
+}
+}
+
+
+document.getElementById("paymentDate").value =
+new Date().toISOString().slice(0,10);
+
+updateDashboard();
+renderMembers();
+renderPayments();
+renderExpenses();
+renderInventory();
+updatePaymentMembers();
+
+</script>
+
+</body>
+</html>
